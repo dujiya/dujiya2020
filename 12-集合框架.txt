@@ -1,0 +1,273 @@
+#### 集合框架
+
+#### Collection
+
+1，List和Set
+
+（1）在实际开发中，需要将使用的对象存储于特定数据结构的容器中
+
+（2）JDK提供了这样的容器--集合（Collection）
+
+（3）Collection是一个接口，定义了集合相关的操作方法，其有两个子接口
+
+（4）List：可重复集（元素是否重复，取决于元素的equals()比较的结果）
+
+（5）Set：不可重复集
+
+2，集合持有对象的引用
+
+（1）集合中存储的都是引用类型元素
+
+（2）集合只保存每个元素对象的引用，而并非将元素对象本身存入集合
+
+```java
+/*
+	栈：            | 堆：
+	                |
+  C 集合地址-------> | 集合对象：元素地址1 ---> 元素对象     
+                    |          元素地址2 ---> 元素对象
+                    |         元素地址3 ---> 元素对象
+                    |       
+*/
+```
+
+3，add方法
+
+（1）Collection定义了一个add方法用于向集合中添加新元素
+
+ -boolean add(E e)
+
+该方法会将给定的元素添加进集合，若添加成功则返回true，否则返回false
+
+```java
+public static void main(String[] args) {
+    Collection<Student> stu=new ArrayList<Student>();
+    stu.add(new Student(1,"张三","男",21));
+    stu.add(new Student(2,"李四","男",20));
+    stu.add(new Student(3,"王五","女",22));
+    System.out.println(stu);
+}
+```
+
+4，contains方法
+
+（1）boolean contains(Object o)
+
+该方法会用于判断给定的元素是否被包含在集合中。若包含则返回true，否则返回false
+
+（2）这里需要注意的是，集合在判断元素是否被包含在集合中是根据每个元素的equals()方法进行比较后的结果
+
+通常有必要重写equals()保证contains()方法的合理结果
+
+```java
+Collection<Student> stu=new ArrayList<Student>();
+stu.add(new Student(1,"张三","男",21));
+stu.add(new Student(2,"李四","男",20));
+stu.add(new Student(3,"王五","女",22));
+Student s1=new Student(4,"王陆","男",23);
+stu.add(s1);
+Student s2=new Student(4,"王陆","男",23);
+//List集合contains方法和对象的equals方法相关
+boolean flag1=stu.contains(s1);
+boolean flag2=stu.contains(s2);
+//如果Student不重写equals方法将为false
+System.out.println(flag1);//true
+System.out.println(flag2);//false
+```
+
+5，size、clear、isEmpty
+
+- int size()：该方法用于返回当前集合中的元素总数
+
+- void clear()：该方法用于清空当前集合
+
+- boolean isEmpty()：该方法用于判断当前集合是否不包含任何元素
+
+
+```java
+Collection<String>c=new HashSet<String>();
+System.out.println(c.isEmpty());//true
+c.add("java");c.add("cpp");c.add("php");
+c.add("c#");c.add("Objective-c");
+System.out.println("isEmpty:"+c.isEmpty+",size:"+c.size());
+//isEmpty:false,size:5
+c.clear();
+System.out.println("isEmpty:"+c.isEmpty+",size:"+c.size());
+//isEmpty:true,size:0
+
+```
+
+6，addAll、containsAll
+
+（1）boolean addAll(Collection<?extends E>c)
+
+该方法需要我们传入一个集合，并将该集合中的所有元素添加到当前集合中
+
+如果此collection由于调用而发生更改，则返回true
+
+（2）boolean containsAll(Collection<?>c)
+
+该方法用于判断当前集合是否包含给定集合中的所有元素，若包含则返回true
+
+```java
+Collection<String> c1=new ArrayList<String>();
+c1.add("java");c1.add("cpp");c1.add("php");
+c1.add("c#");c1.add("Objective-c");
+System.out.println(c1);
+//[java, cpp, php, c#, Objective-c]
+Collection<String>c2=new ArrayList<>();
+c2.addAll(c1);
+System.out.println(c2);
+//[java, cpp, php, c#, Objective-c]
+Collection<String>c3=new ArrayList<>();
+c3.add("java");c3.add("cpp");
+System.out.println(c1.containsAll(c3));//true
+```
+
+
+
+#### Iterator
+
+1，hasNext、next方法
+
+（1）迭代器用于遍历集合元素。获取迭代器可以使用Collection定义的方法
+
+（2）Iterator iterator()
+
+迭代器Iterator是一个接口，集合在重写Collection的iterator()方法是利用内部类提供了迭代器的实现
+
+（3）Iterator提供了统一的遍历集合元素方式，其提供了用于遍历集合的两个方法：
+
+- -boolean hasNext()：判断集合是否还有元素可以遍历
+- -E next()：返回迭代的下一个元素
+
+```java
+Collection<String>c=new HashSet<String>();
+c.add("java");c.add("cpp");c.add("php");
+c.add("c#");c.add("Objective-c");
+//新建c的迭代器对象
+Iterator<String>it=c.iterator();
+//当还有数据
+while (it.hasNext()){
+    String str=it.next();
+    System.out.println(str);
+    //c#
+    //cpp
+    //java
+    //php
+    //Objective-c
+}
+/*
+//迭代器遍历：
+for(Iterator<String>it=c.iterator();it.hasNext();){
+    String s=it.next();
+    System.out.println(s);
+}
+//for-each简化的语法：
+for(String s:list){
+    System.out.println(s);
+}
+*/
+```
+
+2，remove方法
+
+（1）在使用迭代器遍历集合时，不能通过集合的remove方法删除集合元素，否则会抛出并发更改异常
+
+（2）通过迭代器自身提供的remove()方法来删除通过next()迭代出的元素
+
+（3）void remove()：迭代器的删除方法是在原集合中删除元素
+
+（4）这里需要注意的是，在调用remove()方法前必须通过迭代器的next()方法迭代过元素，那么删除的就是这个元素。并且不能再次调用remove()方法，除非再次调用next()后方可再次调用
+
+```java
+Collection<String>c=new HashSet<String>();
+c.add("java");c.add("cpp");c.add("php");
+c.add("c#");c.add("Objective-c");
+System.out.println(c);
+//[c#, cpp, java, php, Objective-c]
+Iterator<String>it=c.iterator();
+while (it.hasNext()){
+    String str=it.next();
+    if(str.indexOf('c')!=-1){
+        it.remove();//删除str中包含字符c的str
+    }
+}
+System.out.println(c);//[java, php]
+```
+
+3，增强型for循环
+
+（1）Java5.0之后推出了一个新的特性，增强for循环，也称为for-each循环
+
+（2）该循环不同于传统的循环工作，其只用于遍历集合或数组
+
+（3）语法：for(元素类型 e:集合或数组){循环体}
+
+新循环并非新的语法，而是在编译过程中，编译器会将新循环转换为迭代器模式。所以新循环本质上是迭代器
+
+```java
+Collection<String>c=new HashSet<String>();
+c.add("java");c.add("cpp");c.add("php");
+c.add("c#");c.add("Objective-c");
+System.out.println(c);
+//[c#, cpp, java, php, Objective-c]
+for(String str:c){
+    System.out.print(str.toUpperCase()+" ");
+    //C# CPP JAVA PHP OBJECTIVE-C
+}
+```
+
+
+
+#### 泛型机制
+
+1，泛型在集合中的应用
+
+（1）泛型是Java SE 5.0引入的特性，泛型的本质是参数化类型
+
+（2）在类、接口和方法的定义过程中，所操作的数据类型被传入的参数指定
+
+（3）Java泛型机制广泛的应用在集合框架中。所有的集合类型都带有泛型参数，这样在创建集合时可以指定放入集合中的元素类型。
+
+（4）Java编译器可以据此进行类型检查，这样可以减少代码在运行时出现错误的可能性
+
+2，泛型在集合中的应用
+
+ArrayList类的定义中，<E>中的E为泛型参数，在创建对象时可以将类型作为参数传递，此时，类定义所有的E将被替换成传入的参数；
+
+```java
+ArrayList<String> list=new ArrayList<String>();
+list.add("One");
+list.add(100);//Java编译器类型检查错误
+              //此时add方法应该传入的参数类型是String
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
